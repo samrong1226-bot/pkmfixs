@@ -264,19 +264,35 @@
             saveButton.disabled = true;
 
             try {
-                // สร้าง FormData object จากฟอร์มโดยตรง
-                const formData = new FormData(form);
-                
-                // --- เพิ่ม 2 บรรทัดนี้เข้าไป ---
-                // ดึงค่าวันที่แล้วเพิ่มเข้าไปใน formData ด้วยตัวเอง
-                const dateValue = document.getElementById('date').value;
-                formData.append('DATE', dateValue);
-                // --------------------------
+                // --- ส่วนที่แก้ไข: รวบรวมข้อมูลด้วยตัวเอง ---
+                const payload = {};
+                // ดึงข้อมูลจาก input และ select ทั้งหมด
+                form.querySelectorAll('input, select, textarea').forEach(input => {
+                    if (input.name && !input.type.startsWith('file')) {
+                        payload[input.name] = input.value;
+                    }
+                });
 
-                // เราจะส่ง FormData ไปตรงๆ ไม่ต้องแปลงเป็น JSON
+                // ดึงข้อมูลรูปภาพ (ต้องทำแยก)
+                const imageFile1 = document.getElementById('image1').files[0];
+                const imageFile2 = document.getElementById('image2').files[0];
+                const imageFile3 = document.getElementById('image3').files[0];
+
+                const p1 = (imageFile1) ? fileToBase64(imageFile1) : Promise.resolve(null);
+                const p2 = (imageFile2) ? fileToBase64(imageFile2) : Promise.resolve(null);
+                const p3 = (imageFile3) ? fileToBase64(imageFile3) : Promise.resolve(null);
+
+                const [base64_1, base64_2, base64_3] = await Promise.all([p1, p2, p3]);
+
+                if (base64_1) payload.image1 = base64_1;
+                if (base64_2) payload.image2 = base64_2;
+                if (base64_3) payload.image3 = base64_3;
+                // ------------------------------------------
+
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
-                    body: formData // ส่ง FormData ไปทั้งก้อน
+                    mode: 'cors',
+                    body: JSON.stringify(payload)
                 });
 
                 const result = await response.json();
