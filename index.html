@@ -247,7 +247,7 @@
             });
         }
 
-       form.addEventListener('submit', (e) => {
+       form.addEventListener('submit', async (e) => {
             e.preventDefault();
 
             if (!form.checkValidity()) {
@@ -263,65 +263,62 @@
             });
             saveButton.disabled = true;
 
-            const formData = new FormData(form);
-            const payload = Object.fromEntries(formData.entries());
-            
-            payload['DATE'] = document.getElementById('date').value;
+            try {
+                // --- กลับมาใช้ Async/Await และสร้าง payload แบบตรงไปตรงมา ---
+                const formData = new FormData(form);
+                const payload = Object.fromEntries(formData.entries());
+                
+                // เพิ่มวันที่ด้วยตัวเอง
+                payload.DATE = document.getElementById('date').value;
 
-            const imageFile1 = formData.get('image1');
-            const imageFile2 = formData.get('image2');
-            const imageFile3 = formData.get('image3');
+                // แปลงไฟล์เป็น Base64
+                const imageFile1 = formData.get('image1');
+                const imageFile2 = formData.get('image2');
+                const imageFile3 = formData.get('image3');
 
-            delete payload.image1;
-            delete payload.image2;
-            delete payload.image3;
-            
-            const p1 = (imageFile1 && imageFile1.size > 0) ? fileToBase64(imageFile1) : Promise.resolve(null);
-            const p2 = (imageFile2 && imageFile2.size > 0) ? fileToBase64(imageFile2) : Promise.resolve(null);
-            const p3 = (imageFile3 && imageFile3.size > 0) ? fileToBase64(imageFile3) : Promise.resolve(null);
+                // ใช้ Promise.all เพื่อความแน่นอนในการรอไฟล์
+                const [base64_1, base64_2, base64_3] = await Promise.all([
+                    (imageFile1 && imageFile1.size > 0) ? fileToBase64(imageFile1) : null,
+                    (imageFile2 && imageFile2.size > 0) ? fileToBase64(imageFile2) : null,
+                    (imageFile3 && imageFile3.size > 0) ? fileToBase64(imageFile3) : null
+                ]);
 
-            Promise.all([p1, p2, p3])
-                .then(([base64_1, base64_2, base64_3]) => {
-                    if (base64_1) payload.image1 = base64_1;
-                    if (base64_2) payload.image2 = base64_2;
-                    if (base64_3) payload.image3 = base64_3;
+                // ใส่ข้อมูล Base64 กลับเข้าไป
+                payload.image1 = base64_1;
+                payload.image2 = base64_2;
+                payload.image3 = base64_3;
 
-                    // เปลี่ยนวิธีส่งเล็กน้อย
-                    const dataToSend = {
-                      parameter: payload,
-                      postData: {
-                        contents: JSON.stringify(payload),
-                        type: 'application/json'
-                      }
-                    };
-
-                    return fetch(SCRIPT_URL, {
-                        method: 'POST',
-                        mode: 'cors',
-                        body: JSON.stringify(dataToSend) // ส่งข้อมูลในรูปแบบใหม่
-                    });
-                })
-                .then(response => response.json())
-                .then(result => {
-                    if (result.result === 'success') {
-                        Swal.fire({
-                            icon: 'success',
-                            title: 'บันทึกข้อมูลสำเร็จแล้ว',
-                            html: `เลขที่ใบแจ้งซ่อมของคุณคือ: <strong>${result.id}</strong>`,
-                            showConfirmButton: true
-                        });
-                        resetForm();
-                    } else {
-                        throw new Error(result.message || 'Unknown error from server');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showErrorAlert(`เกิดข้อผิดพลาด: ${error.message}`);
-                })
-                .finally(() => {
-                    saveButton.disabled = false;
+                // ----------------------------------------------------
+                
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    mode: 'cors',
+                    headers: {
+                        // ระบุ Content-Type ให้ชัดเจน
+                        'Content-Type': 'text/plain;charset=utf-8',
+                    },
+                    body: JSON.stringify(payload)
                 });
+
+                const result = await response.json();
+
+                if (result.result === 'success') {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'บันทึกข้อมูลสำเร็จแล้ว',
+                        html: `เลขที่ใบแจ้งซ่อมของคุณคือ: <strong>${result.id}</strong>`,
+                        showConfirmButton: true
+                    });
+                    resetForm();
+                } else {
+                    throw new Error(result.message || 'Unknown error from server');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                showErrorAlert(`เกิดข้อผิดพลาด: ${error.message}`);
+            } finally {
+                saveButton.disabled = false;
+            }
         });
 
         function showErrorAlert(message) {
