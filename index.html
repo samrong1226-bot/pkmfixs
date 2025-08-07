@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ฟอร์มแจ้งซ่อม</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Sarabun:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <style>
+        body { font-family: 'Sarabun', 'Inter', sans-serif; }
+        .file-input-label { display: flex; justify-content: center; align-items: center; width: 100%; height: 8rem; border: 2px dashed #d1d5db; border-radius: 0.5rem; cursor: pointer; transition: background-color 0.2s, border-color 0.2s; position: relative; overflow: hidden; }
+        .file-input-label:hover { background-color: #f9fafb; border-color: #6b7280; }
+        .file-input { display: none; }
+        .preview-image { width: 100%; height: 100%; object-fit: cover; position: absolute; top: 0; left: 0; }
+        .hidden-section { display: none; }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden">
+        <div class="bg-gray-50 p-4 border-b border-gray-200 flex items-center justify-between">
+            <h1 class="text-xl font-bold text-gray-800 mx-auto">แจ้งเรื่องซ่อม</h1>
+        </div>
+        <form id="repairForm" class="p-6 md:p-8 space-y-6">
+            <div>
+                <label for="date" class="block text-sm font-medium text-gray-700 mb-1">วันที่ :</label>
+                <input type="text" id="date" name="DATE" class="w-full p-2 border border-gray-300 rounded-md bg-gray-100" readonly>
+            </div>
+            <div>
+                <label for="work-type" class="block text-sm font-medium text-gray-700 mb-1">ประเภทงาน :</label>
+                <select id="work-type" name="ประเภทงาน" class="w-full p-2 border border-gray-300 rounded-md" required>
+                    <option value="">-- เลือกประเภทงาน --</option>
+                    <option value="งานซ่อมทั่วไป">งานซ่อมทั่วไป</option>
+                    <option value="งาน PM เครื่องจักร">งาน PM เครื่องจักร</option>
+                    <option value="งานปรับปรุงแก้ไขให้ดีขึ้น">งานปรับปรุงแก้ไขให้ดีขึ้น</option>
+                    <option value="งานซ่อมฉุกเฉิน (ไลน์ไม่หยุดผลิต)">งานซ่อมฉุกเฉิน (ไลน์ไม่หยุดผลิต)</option>
+                    <option value="งานซ่อมฉุกเฉิน (ไลน์หยุดผลิต)">งานซ่อมฉุกเฉิน (ไลน์หยุดผลิต)</option>
+                </select>
+            </div>
+            <div>
+                <label for="location" class="block text-sm font-medium text-gray-700 mb-1">สถานที่ :</label>
+                <select id="location" name="สถานที่" class="w-full p-2 border border-gray-300 rounded-md" required>
+                        <option value="">-- เลือกสถานที่ --</option>
+      		              <option value="Line 1">Line 1 ผลิตแป้งโม่น้ำ</option>
+        	              <option value="Line 2">Line 2 ผลิตแป้งโม่แห้งกึ่งเปียก 1</option>
+        	              <option value="Line 3">Line 3 ผลิตแป้งโม่แห้งกึ่งเปียก 2</option>
+                        <option value="Line 4">Line 4 ไซโลเก็บวัตถุดิบข้าว สำหรับผลิตแป้ง</option>
+                        <option value="Line 5">Line 5 บรรจุแป้ง</option>
+                        <option value="Line 6">Line 6 บรรจุุสาคู</option>
+		                    <option value="Line 7">Line 7 ผสมแป้ง</option>
+		                    <option value="Line 8">Line 8 บำบัดน้ำเสีย</option>
+		                    <option value="Line 9">Line 9 ผลิตน้ำประปา</option>
+		                    <option value="Line 10">Line 10 ขนส่ง</option>
+		                    <option value="Line 11">Line 11 ผลิต บรรจุข้าวสาร</option>
+		                    <option value="Line 12">Line 12 ผสมแป้ง Gluten Free</option>
+                        <option value="อื่นๆ">อื่นๆ</option>
+                </select>
+            </div>
+            <div id="machine-section" class="hidden-section">
+                <label for="machine" class="block text-sm font-medium text-gray-700 mb-1">เครื่องจักร :</label>
+                <select id="machine" name="เครื่องจักร" class="w-full p-2 border border-gray-300 rounded-md">
+                    <option value="">-- เลือกสถานที่ก่อน --</option>
+                    </select>
+                <input type="hidden" id="machine-code" name="รหัสเครื่องจักร" value="">
+            </div>
+            <div id="repair-spot-section" class="hidden-section">
+                <label for="repair-spot" class="block text-sm font-medium text-gray-700 mb-1">จุดที่ต้องการให้ไปซ่อม :</label>
+                <textarea id="repair-spot" name="จุดที่ต้องการให้ไปซ่อม" rows="2" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
+            </div>
+            <div>
+                <label for="initial-cause" class="block text-sm font-medium text-gray-700 mb-1">สาเหตุเบื้องต้น :</label>
+                <textarea id="initial-cause" name="สาเหตุเบื้องต้น" rows="2" class="w-full p-2 border border-gray-300 rounded-md" required></textarea>
+            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">รูปภาพ :</label>
+                    <label for="image1" class="file-input-label" id="image1-label"><span class="text-gray-400 text-sm">เพิ่มรูปภาพ</span></label>
+                    <input type="file" id="image1" name="image1" class="file-input" accept="image/*" onchange="previewImage(event, 'image1-label')">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">รูปภาพ :</label>
+                    <label for="image2" class="file-input-label" id="image2-label"><span class="text-gray-400 text-sm">เพิ่มรูปภาพ</span></label>
+                    <input type="file" id="image2" name="image2" class="file-input" accept="image/*" onchange="previewImage(event, 'image2-label')">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">รูปภาพ :</label>
+                    <label for="image3" class="file-input-label" id="image3-label"><span class="text-gray-400 text-sm">เพิ่มรูปภาพ</span></label>
+                    <input type="file" id="image3" name="image3" class="file-input" accept="image/*" onchange="previewImage(event, 'image3-label')">
+                </div>
+            </div>
+            <div>
+                <label for="remarks" class="block text-sm font-medium text-gray-700 mb-1">หมายเหตุ :</label>
+                <textarea id="remarks" name="หมายเหตุ" rows="1" class="w-full p-2 border border-gray-300 rounded-md"></textarea>
+            </div>
+            <div>
+                <label for="reporter" class="block text-sm font-medium text-gray-700 mb-1">ผู้แจ้ง :</label>
+                <input type="text" id="reporter" name="ผู้แจ้ง" class="w-full p-2 border border-gray-300 rounded-md" required>
+            </div>
+              <input type="hidden" id="status" name="สถานะงาน" value="แจ้งแล้ว">
+        </form>
+        <div class="bg-gray-50 p-4 border-t border-gray-200 flex items-center justify-end space-x-3">
+            <button type="button" onclick="confirmReset()" class="px-6 py-2 bg-gray-200 text-gray-800 font-semibold rounded-lg hover:bg-gray-300">Cancel</button>
+            <button id="saveButton" type="submit" form="repairForm" class="px-8 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700">Save</button>
+        </div>
+    </div>
+    <script>
+        const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxNG9bw8ZokxorSJahdNS3AWQ1-9cEQ_1PFRwmYSug5XI2v0IIawwEpbvZZoeNseP5F/exec";
+        const MACHINE_DATA_URL = "https://script.google.com/macros/s/AKfycbyjtYvKK79V7z4YdGjyxUR_EEJ3J7TX0hb2RmnOhLFI2xph2NT8kvWaUo-bCdF5sprA/exec";
+
+        const form = document.getElementById('repairForm');
+        const saveButton = document.getElementById('saveButton');
+        const locationSelect = document.getElementById('location');
+        const machineSelect = document.getElementById('machine');
+        const machineSection = document.getElementById('machine-section');
+        const repairSpotSection = document.getElementById('repair-spot-section');
+        const repairSpotInput = document.getElementById('repair-spot');
+        const machineCodeInput = document.getElementById('machine-code');
+
+        let allMachinesData = [];
+
+        async function fetchMachineData() {
+            try {
+                const response = await fetch(MACHINE_DATA_URL);
+                if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                allMachinesData = await response.json();
+            } catch (error) {
+                console.error('Error fetching machine data:', error);
+                showErrorAlert('Could not load machine data');
+            }
+        }
+
+        function updateMachineDropdown() {
+            const selectedLocation = locationSelect.value;
+            machineSelect.innerHTML = '';
+            machineCodeInput.value = '';
+            repairSpotSection.classList.add('hidden-section');
+            repairSpotInput.value = '';
+            repairSpotInput.required = false;
+
+            if (selectedLocation === 'อื่นๆ') {
+                machineSection.classList.add('hidden-section');
+                repairSpotSection.classList.remove('hidden-section');
+                repairSpotInput.required = true;
+            } else if (selectedLocation && allMachinesData.length > 0) {
+                const filteredMachines = allMachinesData.filter(machine => machine['ProductionLine'] === selectedLocation);
+                
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = filteredMachines.length > 0 ? '-- เลือกเครื่องจักร --' : '-- ไม่มีข้อมูลเครื่องจักร --';
+                machineSelect.appendChild(defaultOption);
+
+                if (filteredMachines.length > 0) {
+                    const otherOption = document.createElement('option');
+                    otherOption.value = 'อื่นๆ';
+                    otherOption.textContent = 'อื่นๆ';
+                    machineSelect.appendChild(otherOption);
+
+                    filteredMachines.forEach(machine => {
+                        const option = document.createElement('option');
+                        option.value = machine['MachineName'];
+                        option.textContent = machine['MachineName'];
+                        option.dataset.machineCode = machine['MachineCode'] || '';
+                        machineSelect.appendChild(option);
+                    });
+                }
+                machineSelect.disabled = false;
+                machineSection.classList.remove('hidden-section');
+            } else {
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = '-- เลือกสถานที่ก่อน --';
+                machineSelect.appendChild(defaultOption);
+                machineSelect.disabled = true;
+                machineSection.classList.add('hidden-section');
+            }
+        }
+
+        function handleMachineChange() {
+            const selectedOption = machineSelect.options[machineSelect.selectedIndex];
+            machineCodeInput.value = '';
+            if (machineSelect.value === 'อื่นๆ') {
+                repairSpotSection.classList.remove('hidden-section');
+                repairSpotInput.required = true;
+            } else {
+                repairSpotSection.classList.add('hidden-section');
+                repairSpotInput.required = false;
+                repairSpotInput.value = '';
+                if (machineSelect.value && selectedOption.dataset.machineCode) {
+                    machineCodeInput.value = selectedOption.dataset.machineCode;
+                }
+            }
+        }
+
+        function setCurrentDateTime() {
+            const dateInput = document.getElementById('date');
+            const now = new Date();
+            const pad = (num) => num.toString().padStart(2, '0');
+            dateInput.value = `${pad(now.getDate())}/${pad(now.getMonth() + 1)}/${now.getFullYear()} ${pad(now.getHours())}:${pad(now.getMinutes())}`;
+        }
+
+        function previewImage(event, labelId) {
+            const label = document.getElementById(labelId);
+            const input = event.target;
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    label.innerHTML = `<img src="${e.target.result}" class="preview-image">`;
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+
+        function resetForm() {
+            form.reset();
+            document.querySelectorAll('.file-input-label').forEach(label => {
+                label.innerHTML = `<span class="text-gray-400 text-sm">เพิ่มรูปภาพ</span>`;
+            });
+            document.getElementById('status').value = 'แจ้งแล้ว';
+            setCurrentDateTime();
+            updateMachineDropdown();
+        }
+
+        function confirmReset() {
+            Swal.fire({
+                title: 'ต้องการล้างฟอร์มใช่หรือไม่?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'ใช่, ล้างข้อมูล',
+                cancelButtonText: 'ยกเลิก'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    resetForm();
+                }
+            })
+        }
+
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        form.addEventListener('submit', (e) => {
+            e.preventDefault();
+
+            if (repairSpotInput.required && !repairSpotInput.value.trim()) {
+                showErrorAlert('กรุณากรอก "จุดที่ต้องการให้ไปซ่อม"');
+                repairSpotInput.focus();
+                return;
+            }
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            Swal.fire({
+                title: 'กำลังบันทึกข้อมูล...',
+                text: 'กรุณารอสักครู่',
+                allowOutsideClick: false,
+                didOpen: () => { Swal.showLoading() }
+            });
+            saveButton.disabled = true;
+
+            const formData = new FormData(form);
+            const payload = Object.fromEntries(formData.entries());
+            
+            payload['DATE'] = document.getElementById('date').value;
+
+            const imageFile1 = formData.get('image1');
+            const imageFile2 = formData.get('image2');
+            const imageFile3 = formData.get('image3');
+
+            delete payload.image1;
+            delete payload.image2;
+            delete payload.image3;
+            
+            const p1 = (imageFile1 && imageFile1.size > 0) ? fileToBase64(imageFile1) : Promise.resolve(null);
+            const p2 = (imageFile2 && imageFile2.size > 0) ? fileToBase64(imageFile2) : Promise.resolve(null);
+            const p3 = (imageFile3 && imageFile3.size > 0) ? fileToBase64(imageFile3) : Promise.resolve(null);
+
+            Promise.all([p1, p2, p3])
+                .then(([base64_1, base64_2, base64_3]) => {
+                    if (base64_1) payload.image1 = base64_1;
+                    if (base64_2) payload.image2 = base64_2;
+                    if (base64_3) payload.image3 = base64_3;
+
+                    return fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'cors',
+                        body: JSON.stringify(payload)
+                    });
+                })
+                .then(response => response.json())
+                .then(result => {
+                    if (result.result === 'success') {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'บันทึกข้อมูลสำเร็จแล้ว',
+                            html: `เลขที่ใบแจ้งซ่อมของคุณคือ: <strong>${result.id}</strong>`,
+                            showConfirmButton: true
+                        });
+                        resetForm();
+                    } else {
+                        throw new Error(result.message || 'Unknown error from server');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showErrorAlert(`เกิดข้อผิดพลาด: ${error.message}`);
+                })
+                .finally(() => {
+                    saveButton.disabled = false;
+                });
+        });
+
+        function showErrorAlert(message) {
+            Swal.fire({
+                icon: 'error',
+                title: 'เกิดข้อผิดพลาด',
+                text: message,
+            });
+        }
+
+        window.addEventListener('DOMContentLoaded', async (event) => {
+            setCurrentDateTime();
+            await fetchMachineData();
+            locationSelect.addEventListener('change', updateMachineDropdown);
+            machineSelect.addEventListener('change', handleMachineChange);
+            updateMachineDropdown();
+        });
+    </script>
+</body>
+</html>
