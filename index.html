@@ -267,9 +267,13 @@
                 // สร้าง FormData object จากฟอร์มโดยตรง
                 const formData = new FormData(form);
                 
-                // เราจะส่ง FormData ไปตรงๆ ไม่ต้องแปลงเป็น JSON
-                // FormData จะจัดการเรื่องการแนบไฟล์ให้เอง
+                // --- เพิ่ม 2 บรรทัดนี้เข้าไป ---
+                // ดึงค่าวันที่แล้วเพิ่มเข้าไปใน formData ด้วยตัวเอง
+                const dateValue = document.getElementById('date').value;
+                formData.append('DATE', dateValue);
+                // --------------------------
 
+                // เราจะส่ง FormData ไปตรงๆ ไม่ต้องแปลงเป็น JSON
                 const response = await fetch(SCRIPT_URL, {
                     method: 'POST',
                     body: formData // ส่ง FormData ไปทั้งก้อน
@@ -295,7 +299,6 @@
                 saveButton.disabled = false;
             }
         });
-       
 
         function showErrorAlert(message) {
             Swal.fire({
